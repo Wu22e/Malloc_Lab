@@ -1,4 +1,12 @@
 /*
+주석을 아주 자세히 달아서 좋네요. 따로 달게 없을 정도로...
+
+제가 단 주석은 //!! 표시했습니다....
+
+*/
+
+
+/*
  * mm-naive.c - The fastest, least memory-efficient malloc package.
  *
  * In this naive approach, a block is allocated by simply incrementing
@@ -50,7 +58,15 @@ team_t team = {
 //#define MINBLOCKSIZE      16                                /* Minmum size for a free block, includes 4 bytes for header/footer                                                            free blocks, 최소 블록 크기 */
 
 #define MINIMUM           24
+//!! minimum siz는 16이 맞는 것 같습니다. 4word(16byte) 로 free block을 충분히 만들 수 있기 때문입니다.
+//!! 현재는 free block을 충분히 만들 수 있음에도 split 시키지 않고 하나의 block으로 만들어 internal fragmentation이 늘어나게 됩니다.
+//!! 물론 4워드짜리가 오히려 활용도가 낮아 external fragmentation을 일으킬수도 있습니다.(16바이트 free블록이 활용되지 않는다면)
+
 #define CHUNKSIZE         16
+//!! malloc 이 init이되면 4워드의 extend heap을 할당 받겠다는 얘기인데, 이 경우 그냥 아주 큰 heap을 받아서 잘라쓰도록 하게 하는게 맞는 거 같습니다.
+//!! 저같은 경우 2의 12승을 요구합니다
+//!! 이상태라면 16byte 힙을 추가로 할당 받는데 이는 이후에 활용되지 않을 가능성이 높습니다.
+//!! 물론 이후 프로세스가 요구하는 만큼만 추가로 heap을 받아서 사용하겠다는 측면에서는 최적화가 이루어질 수도 있을 거같습니다. 물론 계속 extend heap을 요구해야겠지만요.
 
 
 
@@ -92,10 +108,16 @@ team_t team = {
 static char* heap_listp; /* Pointer to first block */
 
 static char* free_listp; /* explicit method, 첫 번째 가용 블록의 포인터로 사용됨 */
+//!! free list의 포인터를 사용한다면 사실 프롤로그의 explicit을 위한 2 word 없이도 구현할 수 있습니다.
+//!! 반대로 프롤로그의 2word가 있다면 free_listp 없이도 구현가능합니다.
 
 #ifdef NEXT_FIT
 static char* next_ptr; /* Next fit rover */
 #endif
+//!! next_fit을 구현하셨네요.
+//!! next_fit이 어디서 update되는지 알 수 없습니다.
+//!! heap_init 에서만 update되는거 같은데, 이렇게 되면 계속 프롤로그에서 시작해서 없을때랑 같은 효과를 냅니다!
+
 
 // PROTOTYPES
 static void* extend_heap(size_t words);
@@ -208,6 +230,12 @@ void* mm_malloc(size_t size)
     /* No fit found. Get more memory and place the block */
     /* 힙을 새로운 가용 블록으로 확장, free list에서 적절한 블록을 찾지 못했으면 힙을 늘려서 할당하고, 그곳에 블록을 할당한다. */
     extendsize = MAX(asize, MINIMUM); // 위에 asize에서 체크해주니까 필요없지않을까?
+
+	//!! 위 구문은 필요없는게 맞습니다.
+	//!! 저는 chunksize를 넣어서 큰 사이즈를 받아서 잘라서 쓰게 구현했습니다.
+	//!! 그렇게 되면 너무 작은 메모리 heap 받을 일이 없어서 external fragmentation을 줄일 수 있을 거라고 생각합니다.
+	//!! 이 코드에서는 chunksize의 교체가 필요합니다.
+
 
     if ((bp = extend_heap(extendsize / WSIZE)) == NULL)
         return NULL;
@@ -419,6 +447,8 @@ static void* extend_heap(size_t words)
 
 
 
+//!! realloc에 대해 각각 상황에 대해 처리를 해주셨네요! 저도 생각못했던건데
+//!! 이러면 굳이 메모리 heap을 새로 받지 않아도 되고 활용도가 될 것 같습니다!!
 
 /*
  * mm_realloc - Implemented simply in terms of mm_malloc and mm_free
