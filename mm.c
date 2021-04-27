@@ -1,7 +1,7 @@
 /*
-ÁÖ¼®À» ¾ÆÁÖ ÀÚ¼¼È÷ ´Ş¾Æ¼­ ÁÁ³×¿ä. µû·Î ´Ş°Ô ¾øÀ» Á¤µµ·Î...
+ì£¼ì„ì„ ì•„ì£¼ ìì„¸íˆ ë‹¬ì•„ì„œ ì¢‹ë„¤ìš”. ë”°ë¡œ ë‹¬ê²Œ ì—†ì„ ì •ë„ë¡œ...
 
-Á¦°¡ ´Ü ÁÖ¼®Àº //!! Ç¥½ÃÇß½À´Ï´Ù....
+ì œê°€ ë‹¨ ì£¼ì„ì€ //!! í‘œì‹œí–ˆìŠµë‹ˆë‹¤....
 
 */
 
@@ -51,49 +51,49 @@ team_t team = {
 
 /* Basic constants and macros */
 
-#define WSIZE     4                                         /* Word and header/footer size (bytes), size in bytes of a single word, ÇÑ ¿öµå Å©±â */
-#define DSIZE     8                                         /* Double word size (bytes), size in bytes of a double word, ´õºí ¿öµå Å©±â */         
+#define WSIZE     4                                         /* Word and header/footer size (bytes), size in bytes of a single word, í•œ ì›Œë“œ í¬ê¸° */
+#define DSIZE     8                                         /* Double word size (bytes), size in bytes of a double word, ë”ë¸” ì›Œë“œ í¬ê¸° */         
 
-//#define INITSIZE          16                                /* Initial size of free list before first free block added, ÃÊ±â Èü Å©±â */
-//#define MINBLOCKSIZE      16                                /* Minmum size for a free block, includes 4 bytes for header/footer                                                            free blocks, ÃÖ¼Ò ºí·Ï Å©±â */
+//#define INITSIZE          16                                /* Initial size of free list before first free block added, ì´ˆê¸° í™ í¬ê¸° */
+//#define MINBLOCKSIZE      16                                /* Minmum size for a free block, includes 4 bytes for header/footer                                                            free blocks, ìµœì†Œ ë¸”ë¡ í¬ê¸° */
 
 #define MINIMUM           24
-//!! minimum siz´Â 16ÀÌ ¸Â´Â °Í °°½À´Ï´Ù. 4word(16byte) ·Î free blockÀ» ÃæºĞÈ÷ ¸¸µé ¼ö ÀÖ±â ¶§¹®ÀÔ´Ï´Ù.
-//!! ÇöÀç´Â free blockÀ» ÃæºĞÈ÷ ¸¸µé ¼ö ÀÖÀ½¿¡µµ split ½ÃÅ°Áö ¾Ê°í ÇÏ³ªÀÇ blockÀ¸·Î ¸¸µé¾î internal fragmentationÀÌ ´Ã¾î³ª°Ô µË´Ï´Ù.
-//!! ¹°·Ğ 4¿öµåÂ¥¸®°¡ ¿ÀÈ÷·Á È°¿ëµµ°¡ ³·¾Æ external fragmentationÀ» ÀÏÀ¸Å³¼öµµ ÀÖ½À´Ï´Ù.(16¹ÙÀÌÆ® freeºí·ÏÀÌ È°¿ëµÇÁö ¾Ê´Â´Ù¸é)
+//!! minimum sizëŠ” 16ì´ ë§ëŠ” ê²ƒ ê°™ìŠµë‹ˆë‹¤. 4word(16byte) ë¡œ free blockì„ ì¶©ë¶„íˆ ë§Œë“¤ ìˆ˜ ìˆê¸° ë•Œë¬¸ì…ë‹ˆë‹¤.
+//!! í˜„ì¬ëŠ” free blockì„ ì¶©ë¶„íˆ ë§Œë“¤ ìˆ˜ ìˆìŒì—ë„ split ì‹œí‚¤ì§€ ì•Šê³  í•˜ë‚˜ì˜ blockìœ¼ë¡œ ë§Œë“¤ì–´ internal fragmentationì´ ëŠ˜ì–´ë‚˜ê²Œ ë©ë‹ˆë‹¤.
+//!! ë¬¼ë¡  4ì›Œë“œì§œë¦¬ê°€ ì˜¤íˆë ¤ í™œìš©ë„ê°€ ë‚®ì•„ external fragmentationì„ ì¼ìœ¼í‚¬ìˆ˜ë„ ìˆìŠµë‹ˆë‹¤.(16ë°”ì´íŠ¸ freeë¸”ë¡ì´ í™œìš©ë˜ì§€ ì•ŠëŠ”ë‹¤ë©´)
 
 #define CHUNKSIZE         16
-//!! malloc ÀÌ initÀÌµÇ¸é 4¿öµåÀÇ extend heapÀ» ÇÒ´ç ¹Ş°Ú´Ù´Â ¾ê±âÀÎµ¥, ÀÌ °æ¿ì ±×³É ¾ÆÁÖ Å« heapÀ» ¹Ş¾Æ¼­ Àß¶ó¾²µµ·Ï ÇÏ°Ô ÇÏ´Â°Ô ¸Â´Â °Å °°½À´Ï´Ù.
-//!! Àú°°Àº °æ¿ì 2ÀÇ 12½ÂÀ» ¿ä±¸ÇÕ´Ï´Ù
-//!! ÀÌ»óÅÂ¶ó¸é 16byte ÈüÀ» Ãß°¡·Î ÇÒ´ç ¹Ş´Âµ¥ ÀÌ´Â ÀÌÈÄ¿¡ È°¿ëµÇÁö ¾ÊÀ» °¡´É¼ºÀÌ ³ô½À´Ï´Ù.
-//!! ¹°·Ğ ÀÌÈÄ ÇÁ·Î¼¼½º°¡ ¿ä±¸ÇÏ´Â ¸¸Å­¸¸ Ãß°¡·Î heapÀ» ¹Ş¾Æ¼­ »ç¿ëÇÏ°Ú´Ù´Â Ãø¸é¿¡¼­´Â ÃÖÀûÈ­°¡ ÀÌ·ç¾îÁú ¼öµµ ÀÖÀ» °Å°°½À´Ï´Ù. ¹°·Ğ °è¼Ó extend heapÀ» ¿ä±¸ÇØ¾ß°ÚÁö¸¸¿ä.
+//!! malloc ì´ initì´ë˜ë©´ 4ì›Œë“œì˜ extend heapì„ í• ë‹¹ ë°›ê² ë‹¤ëŠ” ì–˜ê¸°ì¸ë°, ì´ ê²½ìš° ê·¸ëƒ¥ ì•„ì£¼ í° heapì„ ë°›ì•„ì„œ ì˜ë¼ì“°ë„ë¡ í•˜ê²Œ í•˜ëŠ”ê²Œ ë§ëŠ” ê±° ê°™ìŠµë‹ˆë‹¤.
+//!! ì €ê°™ì€ ê²½ìš° 2ì˜ 12ìŠ¹ì„ ìš”êµ¬í•©ë‹ˆë‹¤
+//!! ì´ìƒíƒœë¼ë©´ 16byte í™ì„ ì¶”ê°€ë¡œ í• ë‹¹ ë°›ëŠ”ë° ì´ëŠ” ì´í›„ì— í™œìš©ë˜ì§€ ì•Šì„ ê°€ëŠ¥ì„±ì´ ë†’ìŠµë‹ˆë‹¤.
+//!! ë¬¼ë¡  ì´í›„ í”„ë¡œì„¸ìŠ¤ê°€ ìš”êµ¬í•˜ëŠ” ë§Œí¼ë§Œ ì¶”ê°€ë¡œ heapì„ ë°›ì•„ì„œ ì‚¬ìš©í•˜ê² ë‹¤ëŠ” ì¸¡ë©´ì—ì„œëŠ” ìµœì í™”ê°€ ì´ë£¨ì–´ì§ˆ ìˆ˜ë„ ìˆì„ ê±°ê°™ìŠµë‹ˆë‹¤. ë¬¼ë¡  ê³„ì† extend heapì„ ìš”êµ¬í•´ì•¼ê² ì§€ë§Œìš”.
 
 
 
-#define MAX(x, y) ((x) > (y)? (x) : (y))                    /* x¿Í yÁß Å« °ªÀ» ±¸ÇÑ´Ù. */
+#define MAX(x, y) ((x) > (y)? (x) : (y))                    /* xì™€ yì¤‘ í° ê°’ì„ êµ¬í•œë‹¤. */
 
                                                                /* Pack a size and allocated bit into a word */
-#define PACK(size, alloc)   ((size)|(alloc))                /* Å©±â¿Í allocated ºñÆ®¸¦ ÇÕÄ£´Ù. Áï, header¿Í footer·Î »ç¿ëµÈ´Ù. */
+#define PACK(size, alloc)   ((size)|(alloc))                /* í¬ê¸°ì™€ allocated ë¹„íŠ¸ë¥¼ í•©ì¹œë‹¤. ì¦‰, headerì™€ footerë¡œ ì‚¬ìš©ëœë‹¤. */
 
 /* Read and write a word at address p */
-#define GET(p)  (*(unsigned int *)(p))                      /* ÁÖ¼Ò p°¡ °¡¸®Å°´Â °÷¿¡ ÀÖ´Â °ªÀ» ÀĞ¾î¿Â´Ù. */    
-#define PUT(p, val)  (*(unsigned int *)(p) = (val))         /* ÁÖ¼Ò p¿¡ °ª valÀ» ÀúÀåÇÑ´Ù. */
+#define GET(p)  (*(unsigned int *)(p))                      /* ì£¼ì†Œ pê°€ ê°€ë¦¬í‚¤ëŠ” ê³³ì— ìˆëŠ” ê°’ì„ ì½ì–´ì˜¨ë‹¤. */    
+#define PUT(p, val)  (*(unsigned int *)(p) = (val))         /* ì£¼ì†Œ pì— ê°’ valì„ ì €ì¥í•œë‹¤. */
 
 /* Read the size and allocated fields from address p */
-#define GET_SIZE(p)  (GET(p) & ~0x7)                                                /* pÆ÷ÀÎÅÍ°¡ °¡¸®Å°´Â °÷ÀÇ size¸¦ °¡Á®¿È(ºí¶ô»çÀÌÁî¸¦ °¡Á®¿È) */
-#define GET_ALLOC(p)  (GET(p) & 0x1)                                                /* pÆ÷ÀÎÅÍ°¡ °¡¸®Å°´Â °÷ÀÇ allocation Á¤º¸¸¦ °¡Á®¿È(1 ¶Ç´Â 0) */
+#define GET_SIZE(p)  (GET(p) & ~0x7)                                                /* pí¬ì¸í„°ê°€ ê°€ë¦¬í‚¤ëŠ” ê³³ì˜ sizeë¥¼ ê°€ì ¸ì˜´(ë¸”ë½ì‚¬ì´ì¦ˆë¥¼ ê°€ì ¸ì˜´) */
+#define GET_ALLOC(p)  (GET(p) & 0x1)                                                /* pí¬ì¸í„°ê°€ ê°€ë¦¬í‚¤ëŠ” ê³³ì˜ allocation ì •ë³´ë¥¼ ê°€ì ¸ì˜´(1 ë˜ëŠ” 0) */
 
 /* Given block ptr bp, compute address of its header and footer */
-#define HDRP(bp)    ((char *)(bp) - WSIZE)                                          /* ºí¶ô Æ÷ÀÎÅÍ¿¡¼­ ¿ŞÂÊÀ¸·Î word size(4 byte) ¸¸Å­ ÀÌµ¿ÇÑ Æ÷ÀÎÅÍ¸¦ ¹İÈ¯(ºí¶ôÀÇ Çì´õ¸¦ °¡¸®Å°´Â Æ÷ÀÎÅÍ) */
-#define FTRP(bp)    ((char *)(bp) + GET_SIZE(HDRP(bp))-DSIZE)                       /* Çì´õÆ÷ÀÎÅÍ¿¡¼­ °¡Á®¿Â »çÀÌÁî¸¦ ºí¶ôÆ÷ÀÎÅÍ¿¡ ´õÇØÁØµÚ DSIZE¸¸Å­ µÎÄ­ ¶¯³¦(ºí¶ôÀÇ Ç²ÅÍ¸¦ °¡¸®Å°´Â Æ÷ÀÎÅÍ) */
+#define HDRP(bp)    ((char *)(bp) - WSIZE)                                          /* ë¸”ë½ í¬ì¸í„°ì—ì„œ ì™¼ìª½ìœ¼ë¡œ word size(4 byte) ë§Œí¼ ì´ë™í•œ í¬ì¸í„°ë¥¼ ë°˜í™˜(ë¸”ë½ì˜ í—¤ë”ë¥¼ ê°€ë¦¬í‚¤ëŠ” í¬ì¸í„°) */
+#define FTRP(bp)    ((char *)(bp) + GET_SIZE(HDRP(bp))-DSIZE)                       /* í—¤ë”í¬ì¸í„°ì—ì„œ ê°€ì ¸ì˜¨ ì‚¬ì´ì¦ˆë¥¼ ë¸”ë½í¬ì¸í„°ì— ë”í•´ì¤€ë’¤ DSIZEë§Œí¼ ë‘ì¹¸ ë•¡ë‚Œ(ë¸”ë½ì˜ í’‹í„°ë¥¼ ê°€ë¦¬í‚¤ëŠ” í¬ì¸í„°) */
 
 /* Given block ptr bp, compute address of next and previous blocks */
-#define NEXT_BLKP(bp)  ((char *)(bp) + GET_SIZE(((char *)(bp) - WSIZE)))            /* ´ÙÀ½ ºí¶ôÀÇ ºí¶ôÆ÷ÀÎÅÍ¸¦ ¹İÈ¯ */
-#define PREV_BLKP(bp)  ((char *)(bp) - GET_SIZE(((char *)(bp) - DSIZE)))            /* ÀÌÀü ºí¶ôÀÇ ºí¶ôÆ÷ÀÎÅÍ¸¦ ¹İÈ¯ */
+#define NEXT_BLKP(bp)  ((char *)(bp) + GET_SIZE(((char *)(bp) - WSIZE)))            /* ë‹¤ìŒ ë¸”ë½ì˜ ë¸”ë½í¬ì¸í„°ë¥¼ ë°˜í™˜ */
+#define PREV_BLKP(bp)  ((char *)(bp) - GET_SIZE(((char *)(bp) - DSIZE)))            /* ì´ì „ ë¸”ë½ì˜ ë¸”ë½í¬ì¸í„°ë¥¼ ë°˜í™˜ */
 
 /* Given block ptr bp, compute address of next and previous free blocks */
-#define PREV_FREE(bp) (*(void **)(bp))                                      /* ºí¶ô Æ÷ÀÎÅÍ bpÀÇ ÀÌÀü °¡¿ë ºí·ÏÀ» °è»êÇÔ */
-#define NEXT_FREE(bp) (*(void **)(bp + WSIZE))                                              /* ºí¶ô Æ÷ÀÎÅÍ bpÀÇ ´ÙÀ½ °¡¿ë ºí·ÏÀ» °è»êÇÔ */
+#define PREV_FREE(bp) (*(void **)(bp))                                      /* ë¸”ë½ í¬ì¸í„° bpì˜ ì´ì „ ê°€ìš© ë¸”ë¡ì„ ê³„ì‚°í•¨ */
+#define NEXT_FREE(bp) (*(void **)(bp + WSIZE))                                              /* ë¸”ë½ í¬ì¸í„° bpì˜ ë‹¤ìŒ ê°€ìš© ë¸”ë¡ì„ ê³„ì‚°í•¨ */
 
 
 /* single word (4) or double word (8) alignment */
@@ -107,16 +107,16 @@ team_t team = {
 /* Global variables, Private variables representing the heap and free list within the heap */
 static char* heap_listp; /* Pointer to first block */
 
-static char* free_listp; /* explicit method, Ã¹ ¹øÂ° °¡¿ë ºí·ÏÀÇ Æ÷ÀÎÅÍ·Î »ç¿ëµÊ */
-//!! free listÀÇ Æ÷ÀÎÅÍ¸¦ »ç¿ëÇÑ´Ù¸é »ç½Ç ÇÁ·Ñ·Î±×ÀÇ explicitÀ» À§ÇÑ 2 word ¾øÀÌµµ ±¸ÇöÇÒ ¼ö ÀÖ½À´Ï´Ù.
-//!! ¹İ´ë·Î ÇÁ·Ñ·Î±×ÀÇ 2word°¡ ÀÖ´Ù¸é free_listp ¾øÀÌµµ ±¸Çö°¡´ÉÇÕ´Ï´Ù.
+static char* free_listp; /* explicit method, ì²« ë²ˆì§¸ ê°€ìš© ë¸”ë¡ì˜ í¬ì¸í„°ë¡œ ì‚¬ìš©ë¨ */
+//!! free listì˜ í¬ì¸í„°ë¥¼ ì‚¬ìš©í•œë‹¤ë©´ ì‚¬ì‹¤ í”„ë¡¤ë¡œê·¸ì˜ explicitì„ ìœ„í•œ 2 word ì—†ì´ë„ êµ¬í˜„í•  ìˆ˜ ìˆìŠµë‹ˆë‹¤.
+//!! ë°˜ëŒ€ë¡œ í”„ë¡¤ë¡œê·¸ì˜ 2wordê°€ ìˆë‹¤ë©´ free_listp ì—†ì´ë„ êµ¬í˜„ê°€ëŠ¥í•©ë‹ˆë‹¤.
 
 #ifdef NEXT_FIT
 static char* next_ptr; /* Next fit rover */
 #endif
-//!! next_fitÀ» ±¸ÇöÇÏ¼Ì³×¿ä.
-//!! next_fitÀÌ ¾îµğ¼­ updateµÇ´ÂÁö ¾Ë ¼ö ¾ø½À´Ï´Ù.
-//!! heap_init ¿¡¼­¸¸ updateµÇ´Â°Å °°Àºµ¥, ÀÌ·¸°Ô µÇ¸é °è¼Ó ÇÁ·Ñ·Î±×¿¡¼­ ½ÃÀÛÇØ¼­ ¾øÀ»¶§¶û °°Àº È¿°ú¸¦ ³À´Ï´Ù!
+//!! next_fitì„ êµ¬í˜„í•˜ì…¨ë„¤ìš”.
+//!! next_fitì´ ì–´ë””ì„œ updateë˜ëŠ”ì§€ ì•Œ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.
+//!! heap_init ì—ì„œë§Œ updateë˜ëŠ”ê±° ê°™ì€ë°, ì´ë ‡ê²Œ ë˜ë©´ ê³„ì† í”„ë¡¤ë¡œê·¸ì—ì„œ ì‹œì‘í•´ì„œ ì—†ì„ë•Œë‘ ê°™ì€ íš¨ê³¼ë¥¼ ëƒ…ë‹ˆë‹¤!
 
 
 // PROTOTYPES
@@ -129,16 +129,16 @@ static void removeFreeBlock(void* bp);
 
 
 /**
- *	@fn		mm_init
+ *	@fn		    mm_init
  *
- *	@brief                  Initialize the heap with freelist prologue/epilogoue and space for the
+ *	@brief              Initialize the heap with freelist prologue/epilogoue and space for the
  *                          initial free block. (32 bytes total)
- *                          freelist¸¦ ÀÌ¿ëÇÏ¿© heapÀ» ÃÊ±âÈ­ÇÑ´Ù. ÀÌ¶§ 32bytes¸¸Å­ÀÇ heapÀ» ¸¸µé¾î¼­
- *                          prologue¿Í epilogoue ±×¸®°í header, next, prev, footer pointer¸¦ ÁöÁ¤ÇØÁØ´Ù.
+ *                          freelistë¥¼ ì´ìš©í•˜ì—¬ heapì„ ì´ˆê¸°í™”í•œë‹¤. ì´ë•Œ 32bytesë§Œí¼ì˜ heapì„ ë§Œë“¤ì–´ì„œ
+ *                          prologueì™€ epilogoue ê·¸ë¦¬ê³  header, next, prev, footer pointerë¥¼ ì§€ì •í•´ì¤€ë‹¤.
  *
- *  @param  void
+ *      @param  void
  *
- *	@return	int             initialize: return -1 on error, 0 on success.
+ *	@return	int         initialize: return -1 on error, 0 on success.
  */
 
  /*
@@ -156,22 +156,22 @@ int mm_init(void)
 {
 
     /* Create the initial empty heap */
-    /* ¸Ş¸ğ¸®¿¡ ÃÊ±â empty heapÀ» ¿ä±¸ÇÑ´Ù. */
+    /* ë©”ëª¨ë¦¬ì— ì´ˆê¸° empty heapì„ ìš”êµ¬í•œë‹¤. */
     //if ((heap_listp = mem_sbrk(2*MINIMUM)) == (void*)-1)
     if ((heap_listp = mem_sbrk(3 * DSIZE)) == (void*)-1)
 
         return -1;
 
-    /* Ã³À½ ºí·Ï ºÎºĞÀ» ÃÊ±âÈ­ ÇÑ´Ù. */
+    /* ì²˜ìŒ ë¸”ë¡ ë¶€ë¶„ì„ ì´ˆê¸°í™” í•œë‹¤. */
     PUT(heap_listp, 0);                                // Padding
     PUT(heap_listp + (1 * WSIZE), PACK(MINIMUM, 1));                  // Free block header
     PUT(heap_listp + (2 * WSIZE), PACK(0, 0));                             // Space for prev pointer
     PUT(heap_listp + (3 * WSIZE), PACK(0, 0));                             // Space for next pointer
     PUT(heap_listp + (4 * WSIZE), PACK(MINIMUM, 1));                  // Free block footer
-    /* epilogue ºí·ÏÀ» ÃÊ±âÈ­ ÇÑ´Ù. */
+    /* epilogue ë¸”ë¡ì„ ì´ˆê¸°í™” í•œë‹¤. */
     PUT(heap_listp + (5 * WSIZE), PACK(0, 1));                             // Epilogue header
 
-    // °¡¿ë ¸®½ºÆ® Æ÷ÀÎÅÍ¸¦ ÃÊ±âÈ­ ÇÑ´Ù.
+    // ê°€ìš© ë¦¬ìŠ¤íŠ¸ í¬ì¸í„°ë¥¼ ì´ˆê¸°í™” í•œë‹¤.
     free_listp = heap_listp + DSIZE;
 
     if (extend_heap(CHUNKSIZE / WSIZE) == NULL)
@@ -186,9 +186,9 @@ int mm_init(void)
 
 
 /**
- *	@fn		mm_malloc
+ *	@fn		   mm_malloc
  *
- *	@brief                  Allocate a block by incrementing the brk pointer.
+ *	@brief             Allocate a block by incrementing the brk pointer.
  *                         Always allocate a block whose size is a multiple of the alignment.
  *
  *                         A block is allocated according to this strategy:
@@ -197,44 +197,44 @@ int mm_init(void)
  *                         (2) Otherwise a free block could not be found, so an extension of the heap is necessary.
  *                         Simply extend the heap and place the allocated block in the new free block.
  *
- * @param  size           ¸Å°³º¯¼ö size¸¦ ³Ñ°Ü¹Ş¾Æ ±× Å©±â¸¸Å­ ºí·ÏÀ» ÇÒ´çÇÔ
+ *      @param  size       ë§¤ê°œë³€ìˆ˜ sizeë¥¼ ë„˜ê²¨ë°›ì•„ ê·¸ í¬ê¸°ë§Œí¼ ë¸”ë¡ì„ í• ë‹¹í•¨
  *
- *	@return void*          initialize: return -1 on error, 0 on success.
+ *	@return void*      initialize: return -1 on error, 0 on success.
  */
 
 void* mm_malloc(size_t size)
 {
-    /* size°¡ ¿Ã¹Ù¸£Áö ¾ÊÀ» ¶§ ¿¹¿ÜÃ³¸® */
-    /* size°¡ À½¼ö °ªÀÏ ¶§´Â ¹«½ÃÇÑ´Ù. */
+    /* sizeê°€ ì˜¬ë°”ë¥´ì§€ ì•Šì„ ë•Œ ì˜ˆì™¸ì²˜ë¦¬ */
+    /* sizeê°€ ìŒìˆ˜ ê°’ì¼ ë•ŒëŠ” ë¬´ì‹œí•œë‹¤. */
     if (size <= 0)
         return NULL;
 
-    size_t asize;                                           /* Adjusted block size, Á¶Á¤µÈ ºí·Ï Å©±â¸¦ À§ÇÑ º¯¼ö */
-    size_t extendsize;                                      /* Amount to extend heap if no fit, ¸Â´Â fitÀÌ ¾øÀ» °æ¿ì ÈüÀ» ´Ã¸®´Â ¾ç */
+    size_t asize;                                           /* Adjusted block size, ì¡°ì •ëœ ë¸”ë¡ í¬ê¸°ë¥¼ ìœ„í•œ ë³€ìˆ˜ */
+    size_t extendsize;                                      /* Amount to extend heap if no fit, ë§ëŠ” fitì´ ì—†ì„ ê²½ìš° í™ì„ ëŠ˜ë¦¬ëŠ” ì–‘ */
     char* bp;
 
 
-    /* blockÀÇ Å©±â °áÁ¤ */
-    /* ¿À¹öÇìµå¿Í Á¤·ÄÀ» À§ÇØ ÇÊ¿äÇÑ ºÎºĞÀ» Æ÷ÇÔÇØ¼­ Å©±â¸¦ °áÁ¤ÇÑ´Ù. */
-    /* Àû¾îµµ ÃÖ¼Ò ºí·Ï Å©±â¸¦ °®µµ·Ï, ¸ÅÅ©·Î·Î ±¸ÇöÇÑ MAX¸¦ ÀÌ¿ëÇÏ¿© Å©±â¸¦ °áÁ¤ÇÑ´Ù. */
+    /* blockì˜ í¬ê¸° ê²°ì • */
+    /* ì˜¤ë²„í—¤ë“œì™€ ì •ë ¬ì„ ìœ„í•´ í•„ìš”í•œ ë¶€ë¶„ì„ í¬í•¨í•´ì„œ í¬ê¸°ë¥¼ ê²°ì •í•œë‹¤. */
+    /* ì ì–´ë„ ìµœì†Œ ë¸”ë¡ í¬ê¸°ë¥¼ ê°–ë„ë¡, ë§¤í¬ë¡œë¡œ êµ¬í˜„í•œ MAXë¥¼ ì´ìš©í•˜ì—¬ í¬ê¸°ë¥¼ ê²°ì •í•œë‹¤. */
     asize = MAX(ALIGN(size) + DSIZE, MINIMUM);
 
     /* Search the free list for a fit */
-    /* ÀûÀıÇÑ °¡¿ëºí·ÏÀ» °¡¿ë¸®½ºÆ®¿¡¼­ °Ë»ö, °áÁ¤ÇÑ Å©±â¿¡ ¾Ë¸ÂÀº ºí·ÏÀ» list¿¡¼­ °Ë»öÇÏ¿© ÇØ´ç À§Ä¡¿¡ ÇÒ´çÇÑ´Ù. */
+    /* ì ì ˆí•œ ê°€ìš©ë¸”ë¡ì„ ê°€ìš©ë¦¬ìŠ¤íŠ¸ì—ì„œ ê²€ìƒ‰, ê²°ì •í•œ í¬ê¸°ì— ì•Œë§ì€ ë¸”ë¡ì„ listì—ì„œ ê²€ìƒ‰í•˜ì—¬ í•´ë‹¹ ìœ„ì¹˜ì— í• ë‹¹í•œë‹¤. */
     if ((bp = find_fit(asize))) {
         place(bp, asize);
-        /* ¸Â´Â ºí·Ï Ã£À¸¸é ÇÒ´ç±â´Â ¿äÃ»ÇÑ ºí·Ï ¹èÄ¡ÇÏ°í, ¿É¼ÇÀ¸·Î ÃÊ°úºÎºĞÀ» ºĞÇÒ */
+        /* ë§ëŠ” ë¸”ë¡ ì°¾ìœ¼ë©´ í• ë‹¹ê¸°ëŠ” ìš”ì²­í•œ ë¸”ë¡ ë°°ì¹˜í•˜ê³ , ì˜µì…˜ìœ¼ë¡œ ì´ˆê³¼ë¶€ë¶„ì„ ë¶„í•  */
         return bp;
     }
 
     /* No fit found. Get more memory and place the block */
-    /* ÈüÀ» »õ·Î¿î °¡¿ë ºí·ÏÀ¸·Î È®Àå, free list¿¡¼­ ÀûÀıÇÑ ºí·ÏÀ» Ã£Áö ¸øÇßÀ¸¸é ÈüÀ» ´Ã·Á¼­ ÇÒ´çÇÏ°í, ±×°÷¿¡ ºí·ÏÀ» ÇÒ´çÇÑ´Ù. */
-    extendsize = MAX(asize, MINIMUM); // À§¿¡ asize¿¡¼­ Ã¼Å©ÇØÁÖ´Ï±î ÇÊ¿ä¾øÁö¾ÊÀ»±î?
+    /* í™ì„ ìƒˆë¡œìš´ ê°€ìš© ë¸”ë¡ìœ¼ë¡œ í™•ì¥, free listì—ì„œ ì ì ˆí•œ ë¸”ë¡ì„ ì°¾ì§€ ëª»í–ˆìœ¼ë©´ í™ì„ ëŠ˜ë ¤ì„œ í• ë‹¹í•˜ê³ , ê·¸ê³³ì— ë¸”ë¡ì„ í• ë‹¹í•œë‹¤. */
+    extendsize = MAX(asize, MINIMUM); // ìœ„ì— asizeì—ì„œ ì²´í¬í•´ì£¼ë‹ˆê¹Œ í•„ìš”ì—†ì§€ì•Šì„ê¹Œ?
 
-	//!! À§ ±¸¹®Àº ÇÊ¿ä¾ø´Â°Ô ¸Â½À´Ï´Ù.
-	//!! Àú´Â chunksize¸¦ ³Ö¾î¼­ Å« »çÀÌÁî¸¦ ¹Ş¾Æ¼­ Àß¶ó¼­ ¾²°Ô ±¸ÇöÇß½À´Ï´Ù.
-	//!! ±×·¸°Ô µÇ¸é ³Ê¹« ÀÛÀº ¸Ş¸ğ¸® heap ¹ŞÀ» ÀÏÀÌ ¾ø¾î¼­ external fragmentationÀ» ÁÙÀÏ ¼ö ÀÖÀ» °Å¶ó°í »ı°¢ÇÕ´Ï´Ù.
-	//!! ÀÌ ÄÚµå¿¡¼­´Â chunksizeÀÇ ±³Ã¼°¡ ÇÊ¿äÇÕ´Ï´Ù.
+	//!! ìœ„ êµ¬ë¬¸ì€ í•„ìš”ì—†ëŠ”ê²Œ ë§ìŠµë‹ˆë‹¤.
+	//!! ì €ëŠ” chunksizeë¥¼ ë„£ì–´ì„œ í° ì‚¬ì´ì¦ˆë¥¼ ë°›ì•„ì„œ ì˜ë¼ì„œ ì“°ê²Œ êµ¬í˜„í–ˆìŠµë‹ˆë‹¤.
+	//!! ê·¸ë ‡ê²Œ ë˜ë©´ ë„ˆë¬´ ì‘ì€ ë©”ëª¨ë¦¬ heap ë°›ì„ ì¼ì´ ì—†ì–´ì„œ external fragmentationì„ ì¤„ì¼ ìˆ˜ ìˆì„ ê±°ë¼ê³  ìƒê°í•©ë‹ˆë‹¤.
+	//!! ì´ ì½”ë“œì—ì„œëŠ” chunksizeì˜ êµì²´ê°€ í•„ìš”í•©ë‹ˆë‹¤.
 
 
     if ((bp = extend_heap(extendsize / WSIZE)) == NULL)
@@ -264,19 +264,19 @@ void mm_free(void* bp)
  * of the block from the doubly linked free list.
  */
 
- // °¡¿ë ¸®½ºÆ®¿¡¼­ ºí·ÏÀ» Á¦°ÅÇÑ´Ù
+ // ê°€ìš© ë¦¬ìŠ¤íŠ¸ì—ì„œ ë¸”ë¡ì„ ì œê±°í•œë‹¤
 static void removeFreeBlock(void* bp)
 {
     if (bp) {
-        /* ÀÌÀü °¡¿ë ºí·ÏÀÌ ÀÖ´Ù¸é, ±× ºí·ÏÀÇ next¸¦ ÇöÀçÀÇ ´ÙÀ½ °¡¿ë ºí·ÏÀ» °¡¸®Å°µµ·Ï ÇÑ´Ù. */
+        /* ì´ì „ ê°€ìš© ë¸”ë¡ì´ ìˆë‹¤ë©´, ê·¸ ë¸”ë¡ì˜ nextë¥¼ í˜„ì¬ì˜ ë‹¤ìŒ ê°€ìš© ë¸”ë¡ì„ ê°€ë¦¬í‚¤ë„ë¡ í•œë‹¤. */
         if (PREV_FREE(bp)) {
             NEXT_FREE(PREV_FREE(bp)) = NEXT_FREE(bp);
         }
-        /* ±×·¸Áö ¾ÊÀ¸¸é, °¡¿ë ¸®½ºÆ®ÀÇ Ã³À½(free_listp)ÀÌ ´ÙÀ½ °¡¿ë ºí·ÏÀ» °¡¸®Å°µµ·Ï ÇÑ´Ù. */
+        /* ê·¸ë ‡ì§€ ì•Šìœ¼ë©´, ê°€ìš© ë¦¬ìŠ¤íŠ¸ì˜ ì²˜ìŒ(free_listp)ì´ ë‹¤ìŒ ê°€ìš© ë¸”ë¡ì„ ê°€ë¦¬í‚¤ë„ë¡ í•œë‹¤. */
         else
             free_listp = NEXT_FREE(bp);
 
-        /* ´ÙÀ½ ºí·ÏÀÇ prev´Â bpÀÇ prev°¡ °¡¸®Å°´Â °÷À» °¡¸®Å°µµ·Ï ÇÑ´Ù. */
+        /* ë‹¤ìŒ ë¸”ë¡ì˜ prevëŠ” bpì˜ prevê°€ ê°€ë¦¬í‚¤ëŠ” ê³³ì„ ê°€ë¦¬í‚¤ë„ë¡ í•œë‹¤. */
         if (NEXT_FREE(bp) != NULL)
             PREV_FREE(NEXT_FREE(bp)) = PREV_FREE(bp);
     }
@@ -305,7 +305,7 @@ static void* find_fit(size_t size)
     return NULL;  /* no fit found */
 
 
-   ///* Next-fit search (¼ºÇöÀÌÇü ÄÚµå)*/
+   ///* Next-fit search (ë‹¤ë¥¸ë°©ë²•ìœ¼ë¡œ êµ¬í˜„ ëœ ë¶€ë¶„)*/
    // void* bp;
    // for (bp = next_ptr; GET_SIZE(HDRP(bp)) > 0; bp = NEXT_BLKP(bp)) {
    //     if (!GET_ALLOC(HDRP(bp)) && (asize <= GET_SIZE(HDRP(bp)))) {
@@ -364,15 +364,15 @@ static void place(void* bp, size_t asize)
 static void* coalesce(void* bp)
 {
 
-    /* ÀÌÀü ºí·Ï°ú ´ÙÀ½ ºí·ÏÀÌ ÇÒ´çµÇ¾î ÀÖ´ÂÁö ¾Ë¾Æº¸´Â º¯¼öµé */
+    /* ì´ì „ ë¸”ë¡ê³¼ ë‹¤ìŒ ë¸”ë¡ì´ í• ë‹¹ë˜ì–´ ìˆëŠ”ì§€ ì•Œì•„ë³´ëŠ” ë³€ìˆ˜ë“¤ */
     size_t prev_alloc = GET_ALLOC(FTRP(PREV_BLKP(bp))) || PREV_BLKP(bp) == bp;
     size_t next_alloc = GET_ALLOC(HDRP(NEXT_BLKP(bp)));
     size_t size = GET_SIZE(HDRP(bp));
 
-    /* ÀÌÀü ºí·Ï, ´ÙÀ½ ºí·Ï ÇÒ´çÀÎ °æ¿ì */
-    // ¾Æ¹« °Íµµ ÇÏÁö ¾ÊÀ½. ´ÜÁö ÇØ´ç ºí·ÏÀ» °¡¿ë¸®½ºÆ® ¸Ç ¾Õ¿¡ »ğÀÔ
+    /* ì´ì „ ë¸”ë¡, ë‹¤ìŒ ë¸”ë¡ í• ë‹¹ì¸ ê²½ìš° */
+    // ì•„ë¬´ ê²ƒë„ í•˜ì§€ ì•ŠìŒ. ë‹¨ì§€ í•´ë‹¹ ë¸”ë¡ì„ ê°€ìš©ë¦¬ìŠ¤íŠ¸ ë§¨ ì•ì— ì‚½ì…
 
-    /* ÀÌÀü ºí·Ï ÇÒ´ç, ´ÙÀ½ ºí·Ï °¡¿ëÀÎ °æ¿ì */
+    /* ì´ì „ ë¸”ë¡ í• ë‹¹, ë‹¤ìŒ ë¸”ë¡ ê°€ìš©ì¸ ê²½ìš° */
     if (prev_alloc && !next_alloc) {                              /* Case 1 */
         size += GET_SIZE(HDRP(NEXT_BLKP(bp)));
         removeFreeBlock(NEXT_BLKP(bp));
@@ -406,22 +406,22 @@ static void* coalesce(void* bp)
 }
 
 /**
- *	@fn		extend_heap
+ *	@fn		        extend_heap
  *
- *	@brief                  °¡¿ë ºí·ÏÀÇ ÈüÀ» ´Ã¸®°í, ±×°ÍÀÇ ºí·Ï Æ÷ÀÎÅÍ¸¦ ¹İÈ¯ÇÑ´Ù.
+ *	@brief                  ê°€ìš© ë¸”ë¡ì˜ í™ì„ ëŠ˜ë¦¬ê³ , ê·¸ê²ƒì˜ ë¸”ë¡ í¬ì¸í„°ë¥¼ ë°˜í™˜í•œë‹¤.
  *
- *  @param  words           words Å©±âÀÇ »çÀÌÁî¸¸Å­ ÈüÀ» ´Ã·ÁÁØ´Ù.
+ *      @param  words           words í¬ê¸°ì˜ ì‚¬ì´ì¦ˆë§Œí¼ í™ì„ ëŠ˜ë ¤ì¤€ë‹¤.
  *
  *	@return	static void*
  */
 
 static void* extend_heap(size_t words)
 {
-    char* bp;                   /* ÈüÀ» È®ÀåÇÑ ÈÄ¿¡ »õ·Î¿î ºí·Ï Æ÷ÀÎÅÍ */
-    size_t asize;               /* Èü ¸Ş¸ğ¸®¿¡ size¸¦ ¿ä±¸ */
+    char* bp;                   /* í™ì„ í™•ì¥í•œ í›„ì— ìƒˆë¡œìš´ ë¸”ë¡ í¬ì¸í„° */
+    size_t asize;               /* í™ ë©”ëª¨ë¦¬ì— sizeë¥¼ ìš”êµ¬ */
 
     /* Allocate an even number of words to mainitain alignment */
-    /* Á¤·ÄÀ» À¯ÁöÇÏ±â À§ÇØ wordsÀÇ ¼ö¸¦ Â¦¼ö·Î ¸¸µç´Ù. */
+    /* ì •ë ¬ì„ ìœ ì§€í•˜ê¸° ìœ„í•´ wordsì˜ ìˆ˜ë¥¼ ì§ìˆ˜ë¡œ ë§Œë“ ë‹¤. */
     asize = (words % 2) ? (words + 1) * WSIZE : words * WSIZE;
 
     if (asize < MINIMUM)
@@ -431,13 +431,13 @@ static void* extend_heap(size_t words)
         return NULL;
 
     /* Initialize free block header/footer and the epilogue header */
-    /* °¡¿ë ºí·ÏÀÇ header¿Í footer, epilogue¸¦ ÃÊ±âÈ­ ÇÑ´Ù. */
+    /* ê°€ìš© ë¸”ë¡ì˜ headerì™€ footer, epilogueë¥¼ ì´ˆê¸°í™” í•œë‹¤. */
     PUT(HDRP(bp), PACK(asize, 0));                                       /* Free block header */
     PUT(FTRP(bp), PACK(asize, 0));                                       /* Free block footer */
     PUT(HDRP(NEXT_BLKP(bp)), PACK(0, 1));                               /* New epilogue header */
 
     /* Coalesce if the previous block was free */
-    /* ÀÌÀü ºí·ÏÀÌ °¡¿ë ºí·ÏÀÌ¾ú´Ù¸é ÇÕº´À» ÇÏ°í, °¡¿ë¸®½ºÆ®¿¡ ºí·ÏÀ» Ãß°¡ÇÑ´Ù. */
+    /* ì´ì „ ë¸”ë¡ì´ ê°€ìš© ë¸”ë¡ì´ì—ˆë‹¤ë©´ í•©ë³‘ì„ í•˜ê³ , ê°€ìš©ë¦¬ìŠ¤íŠ¸ì— ë¸”ë¡ì„ ì¶”ê°€í•œë‹¤. */
     return coalesce(bp);
 }
 
@@ -447,8 +447,8 @@ static void* extend_heap(size_t words)
 
 
 
-//!! realloc¿¡ ´ëÇØ °¢°¢ »óÈ²¿¡ ´ëÇØ Ã³¸®¸¦ ÇØÁÖ¼Ì³×¿ä! Àúµµ »ı°¢¸øÇß´ø°Çµ¥
-//!! ÀÌ·¯¸é ±»ÀÌ ¸Ş¸ğ¸® heapÀ» »õ·Î ¹ŞÁö ¾Ê¾Æµµ µÇ°í È°¿ëµµ°¡ µÉ °Í °°½À´Ï´Ù!!
+//!! reallocì— ëŒ€í•´ ê°ê° ìƒí™©ì— ëŒ€í•´ ì²˜ë¦¬ë¥¼ í•´ì£¼ì…¨ë„¤ìš”! ì €ë„ ìƒê°ëª»í–ˆë˜ê±´ë°
+//!! ì´ëŸ¬ë©´ êµ³ì´ ë©”ëª¨ë¦¬ heapì„ ìƒˆë¡œ ë°›ì§€ ì•Šì•„ë„ ë˜ê³  í™œìš©ë„ê°€ ë  ê²ƒ ê°™ìŠµë‹ˆë‹¤!!
 
 /*
  * mm_realloc - Implemented simply in terms of mm_malloc and mm_free
